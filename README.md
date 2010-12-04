@@ -2,8 +2,6 @@ node-modbus-stack
 =================
 ### A [StreamStack][] implementation of the [MODBUS][Modbus] protocol for [Node][].
 
-# STILL UNDER CONSTRUCTION, PLEASE MOVE ALONG!
-
 This module exposes two concrete `StreamStack` implementations:
 `ModbusRequestStack` can be used as a MODBUS client (i.e. Master), and can write
 MODBUS compliant requests and listen for the response.
