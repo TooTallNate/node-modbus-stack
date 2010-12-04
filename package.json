@@ -1,0 +1,21 @@
+{
+  "name": "modbus-stack",
+  "description": "A `StreamStack` implementation of the MODBUS protocol.",
+  "version": "0.0.1",
+  "author": "Nathan Rajlich <nathan@tootallnate.net>",
+  "keywords": ["MODBUS", "protocol", "StreamStack"],
+  "dependencies": {
+    "stream-stack": "*",
+    "bufferlist": "*",
+    "put": "*"
+  },
+  "devDependencies" : {
+    "colors": ">= 0.3.0"
+  },
+  "main": "./lib/modbus-stack",
+  "modules": {
+    "client": "./lib/client",
+    "server": "./lib/server"
+  },
+  "engines": { "node": ">= 0.3.0" }
+}
