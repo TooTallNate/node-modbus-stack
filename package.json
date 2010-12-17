@@ -1,7 +1,7 @@
 {
   "name": "modbus-stack",
   "description": "A `StreamStack` implementation of the MODBUS protocol.",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "author": "Nathan Rajlich <nathan@tootallnate.net>",
   "keywords": ["MODBUS", "protocol", "StreamStack"],
   "dependencies": {
