@@ -5,7 +5,7 @@
   "author": "Nathan Rajlich <nathan@tootallnate.net>",
   "keywords": ["MODBUS", "protocol", "StreamStack"],
   "dependencies": {
-    "stream-stack": "*",
+    "stream-stack": ">= 1.0.1",
     "bufferlist": "*",
     "put": "*"
   },
