@@ -17,7 +17,7 @@ client.request(fc, startAddress, numToRead, function(err, response) {
     throw err;
   }
   
-  [].slice.call(response).forEach(function(register, i) {
+  response.forEach(function(register, i) {
     console.log(
       ("Sensor " + String(startAddress + i).bold + ":\t").blue +
       (String(register/10).bold + '\u00B0F').green

@@ -6,7 +6,7 @@
   "keywords": ["MODBUS", "protocol", "StreamStack"],
   "dependencies": {
     "stream-stack": ">= 1.0.1",
-    "bufferlist": "*",
+    "bufferlist": ">= 0.0.6",
     "put": "*"
   },
   "devDependencies" : {
