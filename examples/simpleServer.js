@@ -1,18 +1,16 @@
-var FUNCTION_CODES = require('modbus-stack').FUNCTION_CODES;
-var ModbusResponseStack = require('modbus-stack').ModbusResponseStack;
+var FC = require('modbus-stack').FUNCTION_CODES;
 
-// A simple MODBUS server (Slave).
-require('net').createServer(function setup(stream) {
-  var response = new ModbusResponseStack(stream);
-  response.on('request', function(request) {
-    console.log(request);
-    var a = new Array(request.quantity);
-    for (var i=0, l=request.quantity; i<l; i++) {
-      a[i] = 7+i;
-    }
-    response.writeResponse(a);
-    if (stream.readable && stream.writable) {
-      setup(stream);
-    }
-  });
-}).listen(502); // Run as root!
+var handlers = {};
+
+handlers[FC.READ_COILS] = function(request, response) {
+  response.writeException(2);
+}
+
+handlers[FC.READ_INPUT_REGISTERS] = function(request, response) {
+  console.log(request);
+  setTimeout(function() {
+  response.writeResponse(new Array(request.quantity));
+  }, 800);
+}
+
+require('modbus-stack/server').createServer(handlers).listen(502);
