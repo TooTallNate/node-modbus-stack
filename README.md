@@ -50,28 +50,28 @@ A MODBUS Slave (Server)
 written in pure JavaScript. Here's an example of a server that would respond to the
 request above:
 
-  var FC = require('modbus-stack').FUNCTION_CODES;
-  
-  // 'handlers' is an Object with keys containing the "Function Codes" that your MODBUS
-  // server will handle. Anything function code requested without a handler defined here
-  // will have the Server transparently respond with Exception Code 1 ("Illegal Function")
-  var handlers = {};
-
-  // Define a handler for "Read Input Registers". We'll just respond with the register
-  // number requested. In a real-world situation, you'd probably look up these values from
-  // a database, etc.
-  handlers[FC.READ_INPUT_REGISTERS] = function(request, response) {
-    var start = request.startAddress;
-    var length = request.quantity;
-
-    var resp = new Array(length);
-    for (var i=0; i<length; i++) {
-      resp[i] = start + i;
+    var FC = require('modbus-stack').FUNCTION_CODES;
+    
+    // 'handlers' is an Object with keys containing the "Function Codes" that your MODBUS
+    // server will handle. Anything function code requested without a handler defined here
+    // will have the Server transparently respond with Exception Code 1 ("Illegal Function")
+    var handlers = {};
+    
+    // Define a handler for "Read Input Registers". We'll just respond with the register
+    // number requested. In a real-world situation, you'd probably look up these values from
+    // a database, etc.
+    handlers[FC.READ_INPUT_REGISTERS] = function(request, response) {
+      var start = request.startAddress;
+      var length = request.quantity;
+      
+      var resp = new Array(length);
+      for (var i=0; i<length; i++) {
+        resp[i] = start + i;
+      }
+      response.writeResponse(resp);
     }
-    response.writeResponse(resp);
-  }
 
-  require('modbus-stack/server').createServer(handlers).listen(502);
+    require('modbus-stack/server').createServer(handlers).listen(502);
 
 A "catch-all" function can be passed to `createServer()` instead of a "handlers" object, if you'd
 rather have a single callback invoked for _all_ MODBUS requests. Just be sure to call
@@ -123,7 +123,7 @@ API
 
     * `ModbusResponseStack#writeException(exceptionCode)` - _Function_<br>
       Writes out a MODBUS exception response after receiving a `request` event. `exceptionCode`
-      should be the desired exception code to respond with. See `EXCEPTION_CODES`.
+      should be the desired exception code to respond with. See `EXCEPTION_CODES`.<br>
       __Usage:__ `res.writeException(EXCEPTION_CODES.ILLEGAL_FUNCTION)`
 
     *  `"request" - function(request)` - _Event_<br>
@@ -147,7 +147,7 @@ API
       __Usage:__ `var req = client.request(FC.READ_COILS, 0, 10)`
 
     * `Client#end()` - _Function_<br>
-      Sends a FIN to the remote slave device, closing the TCP connection.
+      Sends a FIN to the remote slave device, closing the TCP connection.<br>
       __Usage:__ `client.end()`
 
 `require('modbus-stack/server')`
