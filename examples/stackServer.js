@@ -1,20 +1,22 @@
-require('modbus-stack');
+var FC = require('modbus-stack').FUNCTION_CODES;
+
 require('modbus-stack/server').createServer(
   require('stack')(
     // Handle "Read Coils" (well, we just call `next()`...)
-    functionCode(1, function(req, res, next) {
-      console.log("Got request for '1', but passing it on...");
+    functionCode(FC.READ_COILS, function(req, res, next) {
+      console.log('Got request for "Read Coils", but passing it on...');
       next();
     }),
     // Handle "Read Input Registers"
-    functionCode(4, function(req, res, next) {
+    functionCode(FC.READ_INPUT_REGISTERS, function(req, res, next) {
+      console.log('Got "Read Input Registers" request [ ' + req.startAddress + "-" + req.quantity + ' ]');
       var resp = new Array(req.quantity);
       for (var i=0; i < req.quantity; i++) {
         resp[i] = req.startAddress + i;
       }
       res.writeResponse(resp);
     }),
-    // If all else fails, call our "Illegal Function" response.
+    // If all else fails, respond with "Illegal Function"
     illegalFunction
   )
 ).listen(502);
@@ -22,11 +24,9 @@ require('modbus-stack/server').createServer(
 
 function functionCode(fc, callback) {
   return function(req, res, next) {
-    if (req.functionCode === fc) {
-      callback.apply(this, arguments);
-    } else {
+    req.functionCode === fc ?
+      callback.apply(this, arguments) :
       next();
-    }
   }
 }
 
