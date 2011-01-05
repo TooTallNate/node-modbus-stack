@@ -1,7 +1,16 @@
+var Stack = require('stack');
 var FC = require('modbus-stack').FUNCTION_CODES;
 
+// We re-define Stack's "errorHandler" so that it works with the MODBUS API
+Stack.errorHandler = function(request, response, err) {
+  var errCode = err && err.errno ? err.errno : 1;
+  console.log("responding with exception: " + errCode);
+  response.writeException(errCode);
+}
+
+// The MODBUS Server class and Stack work well together:
 require('modbus-stack/server').createServer(
-  require('stack')(
+  Stack(
     // Handle "Read Coils" (well, we just call `next()`...)
     functionCode(FC.READ_COILS, function(req, res, next) {
       console.log('Got request for "Read Coils", but passing it on...');
@@ -15,23 +24,15 @@ require('modbus-stack/server').createServer(
         resp[i] = req.startAddress + i;
       }
       res.writeResponse(resp);
-    }),
-    // If all else fails, respond with "Illegal Function"
-    illegalFunction
+    })
   )
 ).listen(502);
 
-
+// A Convience function to handle a MODBUS "Function Code"
 function functionCode(fc, callback) {
   return function(req, res, next) {
     req.functionCode === fc ?
       callback.apply(this, arguments) :
       next();
   }
-}
-
-function illegalFunction(request, response, err) {
-  var errCode = err && err.errno ? err.errno : 1;
-  console.log("responding with exception: " + errCode);
-  response.writeException(errCode);
 }
