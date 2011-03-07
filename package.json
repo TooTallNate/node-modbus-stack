@@ -1,19 +1,31 @@
 {
   "name": "modbus-stack",
   "description": "A `StreamStack` implementation of the MODBUS protocol.",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "author": "Nathan Rajlich <nathan@tootallnate.net>",
-  "keywords": ["MODBUS", "protocol", "StreamStack"],
+  "keywords": [
+    "MODBUS",
+    "protocol",
+    "StreamStack"
+  ],
   "dependencies": {
     "stream-stack": ">= 1.0.1",
     "bufferlist": ">= 0.0.6",
     "put": "*"
   },
-  "devDependencies" : {
+  "devDependencies": {
     "colors": ">= 0.3.0",
     "expresso": "*"
   },
   "main": "./modbus-stack",
-  "scripts": { "test": "expresso test/test*.js" },
-  "engines": { "node": ">= 0.3.0" }
+  "scripts": {
+    "test": "expresso test/test*.js"
+  },
+  "engines": {
+    "node": ">= 0.3.0"
+  },
+  "directories": {},
+  "files": [
+    ""
+  ]
 }
