@@ -13,11 +13,7 @@
     "colors": ">= 0.3.0",
     "expresso": "*"
   },
-  "main": "./lib/modbus-stack",
-  "modules": {
-    "client": "./lib/client",
-    "server": "./lib/server"
-  },
+  "main": "./modbus-stack",
   "scripts": { "test": "expresso test/test*.js" },
   "engines": { "node": ">= 0.3.0" }
 }
