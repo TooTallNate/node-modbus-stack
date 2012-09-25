@@ -70,4 +70,16 @@ Client.RESPONSES = {
     }
     return rtn;
   }
+  // WRITE_SINGLE_REGISTER
+  5: function(bufferlist) {
+    var rtn = [];
+    var binary = Binary(bufferlist)
+      .getWord8('byteLength').end();
+    rtn.byteLength = binary.vars.byteLength;
+    for (var i=0, l=binary.vars.byteLength/2; i<l; i++) {
+      binary.getWord16be("val");
+      rtn.push(binary.end().vars.val);
+    }
+    return rtn;
+  }
 };
