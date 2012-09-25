@@ -69,7 +69,7 @@ Client.RESPONSES = {
       rtn.push(binary.end().vars.val);
     }
     return rtn;
-  }
+  },
   // WRITE_SINGLE_REGISTER
   5: function(bufferlist) {
     var rtn = [];
