@@ -54,6 +54,22 @@ Client.REQUESTS = {
   5: function(address, value) {
     if (typeof value !== 'boolean') throw new Error('"Write Single Coil" expects a \'boolean\' value');
     return putTwoWord16be(address, value ? 0xff00 : 0x0000);
+  },
+  16: function(address, values) {
+    if(1 > values.length || values.length > 123) {
+      throw new Error('"Write Multipe Registers" expects 1 to 123 registers');
+    }
+
+    request = Put()
+      .word16be(address)
+      .word16be(values.length)
+      .word8(values.length*2);
+
+    for(var i=0; i<values.length; i++) {
+      request.word16be(values[i]);
+    }
+
+    return request.buffer();
   }
 };
 
@@ -82,4 +98,13 @@ Client.RESPONSES = {
     }
     return rtn;
   },
+  // WRITE_MULTIPLE_REGISTERS
+  16: function(bufferlist) {
+    var rtn = [];
+    var binary = Binary(bufferlist);
+      binary.getWord16be("address");
+      binary.getWord16be("quantity");
+    return binary.end().vars;
+  },
+
 };
