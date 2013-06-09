@@ -60,7 +60,7 @@ Client.REQUESTS = {
   6: putTwoWord16be,
 
   // WRITE_MULTIPLE_COILS
-  15: function(adress, values) {
+  15: function(address, values) {
     if(values.length < 1 || values.length > 1968) {
       throw new Error('"Write Multiple Coils" expects 1 to 1968 registers');
     }
@@ -75,8 +75,15 @@ Client.REQUESTS = {
     request = Put()
       .word16be(address)
       .word16be(values.length)
-      .word8(Math.ceil(values.length/8))
-      .put(BitArray.toBuffer(values));
+      .word8(Math.ceil(values.length/8));
+
+    // We have to reverse each 8 bits
+    while(values.length > 0) {
+      request.put(BitArray.toBuffer(
+        values.splice(0,8)
+        .reverse() // The LSB of the first data byte contains the output addressed in the query.
+      ));
+    }
 
     return request.buffer();
   },
