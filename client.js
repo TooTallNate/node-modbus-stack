@@ -4,6 +4,7 @@ var Binary = require('bufferlist/binary').Binary;
 var modbus = require('./modbus-stack');
 var netStream = require('net').Stream;
 var FUNCTION_CODES = modbus.FUNCTION_CODES;
+var BitArray = require('node-bitarray');
 
 /* TCP MODBUS Client interface, as it's the most usual use-case. */
 function Client () {
@@ -54,32 +55,126 @@ Client.REQUESTS = {
   5: function(address, value) {
     if (typeof value !== 'boolean') throw new Error('"Write Single Coil" expects a \'boolean\' value');
     return putTwoWord16be(address, value ? 0xff00 : 0x0000);
+  },
+  // WRITE_SINGLE_REGISTER
+  6: putTwoWord16be,
+
+  // WRITE_MULTIPLE_COILS
+  15: function(address, values) {
+    if(values.length < 1 || values.length > 1968) {
+      throw new Error('"Write Multiple Coils" expects 1 to 1968 registers');
+    }
+
+    values.map(
+      function(val) {
+        if (typeof val !== 'boolean') throw new Error('"Write Multiple Coils" expects \'boolean\' values');
+        return val ? 1 : 0;
+      }
+    )
+
+    request = Put()
+      .word16be(address)
+      .word16be(values.length)
+      .word8(Math.ceil(values.length/8));
+
+    // We have to reverse each 8 bits
+    while(values.length > 0) {
+      request.put(BitArray.toBuffer(
+        values.splice(0,8)
+        .reverse() // The LSB of the first data byte contains the output addressed in the query.
+      ));
+    }
+
+    return request.buffer();
+  },
+
+  // WRITE_MULTIPLE_REGISTERS
+  16: function(address, values) {
+    if(values.length < 1 || values.length > 123) {
+      throw new Error('"Write Multiple Registers" expects 1 to 123 registers');
+    }
+
+    request = Put()
+      .word16be(address)
+      .word16be(values.length)
+      .word8(values.length*2);
+
+    for(var i=0; i<values.length; i++) {
+      request.word16be(values[i]);
+    }
+
+    return request.buffer();
   }
 };
 
-Client.RESPONSES = {
-  // READ_INPUT_REGISTERS
-  4: function(bufferlist) {
-    var rtn = [];
+function readBitArray(bufferlist) {
+  var binary = Binary(bufferlist)
+    .getWord8('byteCount')
+    .end();
+
+  var rtn = [];
+  for(var i=0, l=binary.vars.byteCount; i<l; i++) {
+    binary.getBuffer("oneByteBuffer", 1).end();
+    rtn = rtn.concat(
+      BitArray.fromBuffer(binary.vars.oneByteBuffer)
+        .reverse() // The LSB of the first data byte contains the output addressed in the query.
+        .map(function(val) { return val==1 ? true : false})
+    );
+  }
+
+  rtn.byteCount = binary.vars.byteCount;
+  return rtn;
+}
+
+function read16beArray(bufferlist) {
     var binary = Binary(bufferlist)
-      .getWord8('byteLength').end();
-    rtn.byteLength = binary.vars.byteLength;
-    for (var i=0, l=binary.vars.byteLength/2; i<l; i++) {
+      .getWord8('byteCount')
+      .end();
+    
+    var rtn = [];
+    rtn.byteCount = binary.vars.byteCount;
+    for (var i=0, l=binary.vars.byteCount/2; i<l; i++) {
       binary.getWord16be("val");
       rtn.push(binary.end().vars.val);
     }
     return rtn;
-  },
+  }
+
+function readAddressQuantity(bufferlist) {
+  var binary = Binary(bufferlist)
+    .getWord16be("address")
+    .getWord16be("quantity")
+    .end();
+  return binary.vars;
+}
+
+function readAddressValue(bufferlist) {
+  var binary = Binary(bufferlist)
+    .getWord16be("address")
+    .getWord16be("value")
+    .end();
+  return binary.vars;
+}
+
+Client.RESPONSES = {
+  // READ_COILS
+  1: readBitArray,
+  // READ_DISCRETE_INPUTS,
+  2: readBitArray,
+  // READ_HOLDING_REGISTERS
+  3: read16beArray,
+  // READ_INPUT_REGISTERS
+  4: read16beArray,
   // WRITE_SINGLE_COIL
   5: function(bufferlist) {
-    var rtn = [];
-    var binary = Binary(bufferlist)
-      .getWord8('byteLength').end();
-    rtn.byteLength = binary.vars.byteLength;
-    for (var i=0, l=binary.vars.byteLength/2; i<l; i++) {
-      binary.getWord16be("val");
-      rtn.push(binary.end().vars.val);
-    }
+    var rtn = readAddressValue(bufferlist);
+    rtn.value = rtn.value ? true : false;
     return rtn;
   },
+  // WRITE_SINGLE_REGISTER
+  6: readAddressValue, 
+  // WRITE_MULTIPLE_COILS
+  15: readAddressQuantity,
+  // WRITE_MULTIPLE_REGISTERS
+  16: readAddressQuantity,
 };

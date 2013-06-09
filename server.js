@@ -5,6 +5,7 @@ var Binary = require('bufferlist/binary').Binary;
 var modbus = require('./modbus-stack');
 var FUNCTION_CODES = modbus.FUNCTION_CODES;
 
+
 /* Streamlined TCP MODBUS server class. Can be used to respond to MODBUS requests
  * from TCP clients. `handlers` can be a function which is invoked for every
  * "request" event, or an Object with keys being the Function Codes your server
