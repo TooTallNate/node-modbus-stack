@@ -33,8 +33,8 @@ Server.prototype._setupConn = function(stream) {
   });
   
   response.on('not_implemented', function (request) {
-	  console.log("on not_implemented");
-	  console.log(JSON.stringify(request));
+	  //console.log("on not_implemented");
+	  //console.log(JSON.stringify(request));
 	  self.emit('request', request, response);
 	  if (stream.readable && stream.writable) {
 		self._setupConn(stream);
@@ -45,7 +45,7 @@ Server.prototype._setupConn = function(stream) {
 
 // Called for every 'request' event, when a "handlers" Object was passed.
 Server.prototype._handler = function(request, response) {
- console.log("server.js: " + JSON.stringify(request));
+ //console.log("server.js: " + JSON.stringify(request));
   if (request.functionCode in this.handlers) {
     this.handlers[request.functionCode].call(this, request, response);
   } else {
@@ -102,7 +102,7 @@ Server.REQUESTS = {
   17: no_parameters,
   
   //unknown function code - error case
-  666: no_parameters
+  //666: no_parameters
 };
 
 Server.RESPONSES = {
