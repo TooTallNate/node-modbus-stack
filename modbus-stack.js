@@ -190,7 +190,14 @@ ModbusResponseStack.prototype._onData = function(chunk) {
   } else if (this.requestHeader && this.functionCode >= 1 && this.bufferlist.length >= (this.requestHeader.length-2)) {
     // We have the complete request.
     if (!server.REQUESTS[this.functionCode]) {
-      return this.emit('error', new Error('"REQUESTS['+this.functionCode+']" in "server.js" is not implemented!'));
+		//this._gotRequest = true;
+		//this.writeException(1);
+      //return this.emit('error', new Error('"REQUESTS['+this.functionCode+']" in "server.js" is not implemented!'));
+      
+      console.log(JSON.stringify(this.requestHeader));
+	  this.request = this.requestHeader;
+	  this._gotRequest = true;
+      return this.emit('not_implemented', this.request);
     }
     try {
       this.request = server.REQUESTS[this.functionCode].call(this, this.bufferlist);
@@ -206,6 +213,7 @@ ModbusResponseStack.prototype._onData = function(chunk) {
     //console.log('bufferlist.length: ' + this.bufferlist.length);
     this._gotRequest = true;
     this.emit('request', this.request);
+    //console.log("modbus-stack.js" +JSON.stringify(this.request));
   }
 }
 

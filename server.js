@@ -31,10 +31,21 @@ Server.prototype._setupConn = function(stream) {
       self._setupConn(stream);
     }
   });
+  
+  response.on('not_implemented', function (request) {
+	  //console.log("on not_implemented");
+	  //console.log(JSON.stringify(request));
+	  self.emit('request', request, response);
+	  if (stream.readable && stream.writable) {
+		self._setupConn(stream);
+	  }
+  });
+  
 }
 
 // Called for every 'request' event, when a "handlers" Object was passed.
 Server.prototype._handler = function(request, response) {
+ //console.log("server.js: " + JSON.stringify(request));
   if (request.functionCode in this.handlers) {
     this.handlers[request.functionCode].call(this, request, response);
   } else {
@@ -88,20 +99,39 @@ Server.REQUESTS = {
   // GET_COMM_EVENT_LOG (Serial Line Only)
   12: no_parameters,
   // REPORT_SLAVE_ID (Serial Line Only)
-  17: no_parameters
+  17: no_parameters,
+  
+  //unknown function code - error case
+  //666: no_parameters
 };
 
 Server.RESPONSES = {
   // READ_INPUT_REGISTERS
   4: function(registers) {
-    if (!Array.isArray(registers) || registers.length != this.request.quantity) {
-      throw new Error('Expected to write an "Array" of length "'+this.request.quantity+'"');
-    }
-    var i=0, l=registers.length, put = Put()
-      .word8(registers.length*2);
-    for (; i<l; i++) {
-      put.word16be(registers[i]);
-    }
-    return put.buffer();
+		if(Buffer.isBuffer(registers) == false)
+			throw new Error('Expected to write an "Buffer"');
+		var put = Put();
+		put.word8(registers.length);
+		put.put(registers)
+		return(put.buffer());
+  },
+  // READ_HOLDING_REGISTERS
+  3: function(registers) {
+		if(Buffer.isBuffer(registers) == false)
+			throw new Error('Expected to write an "Buffer"');
+		var put = Put();
+		put.word8(registers.length);
+		put.put(registers)
+		return(put.buffer());
+  },
+  //WRITE_SINGLE_REGISTER
+  6: function(address,value) {
+		//if(Buffer.isBuffer(registers) == false)
+		//	throw new Error('Expected to write an "Buffer"');
+		var put = Put();
+		put.word16be(address);
+		put.word16be(value);
+		return(put.buffer());
   }
+  
 };
